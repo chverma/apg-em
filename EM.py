@@ -1,56 +1,169 @@
-#/usr/bin/python3.6
+#!/usr/bin/python3.6
 import numpy as np
 import random
 
-class modelEM:
+
+class ModelEM:
+    """
+    ModelEM implements Expectation-Maximization algorithm with some features
+    in order to reproduce some experiments on APG subject
+    """
+    _probabilities = None
+    _gaussParams = None
+    _nGauss = None
+
     def __init__(self, gaussParams=[[-6, 2], [2, 2]], probabilities=[0.4, 0.6]):
-        self.probabilities=probabilities
-        self.gaussParams=gaussParams
+        self._probabilities = probabilities
+        self._gaussParams = gaussParams
+        self._nGauss = len(self._probabilities)
 
-    def expectation(self,data):
-        Z = np.zeros((len(self.probabilities), len(data)))
-        for m, p in enumerate(data):
-            sumF = sum(self.estimate_conjunt_density(p, prior, gauss) for prior, gauss in zip(self.probabilities, self.gaussParams))
-            for k, (prior, gaussiana) in enumerate(zip(self.probabilities, self.gaussParams)):
-                    Z[k,m] = self.estimate_conjunt_density(p, prior, gaussiana) / sumF
-        return Z
+    def getNumOfGaussians(self):
+        """
+        Retrieve the number of gaussians used by the model
 
-    def reestimateVariance(self):
-        for k, gauss in enumerate(self.gaussParams):
-                self.gaussParams[k][1] = np.sqrt( sum( Z[k,m]*(point - self.gaussParams[k][0])**2 for m,point in enumerate(data)) / n[k])
-    def maximization(self, Z, data, r_priors=False, r_means=False, r_vars=False):
-        n = [sum( Z[k, :]) for k in range(len(self.probabilities))]
-        m = len(data)
-        if r_priors:
-                self.probabilities = [n_k / m for n_k in n]
-        if r_means:
-                for k in range(len(self.gaussParams)):
-                        self.gaussParams[k][0] = sum(Z[k,m]*point for m,point in enumerate(data)) / n[k]
+        Returns:
+        out:int
 
-        if r_vars:
-            self.reestimateVariance()
+        """
+        return self._nGauss
 
-    def reestimate(self, data, r_priors=False, r_means=False, r_vars=False):
-        Z = self.expectation(data)
-        self.maximization(Z, data, r_priors, r_means, r_vars)
+    def getGaussianParameters(self):
+        """
+        Retrieve the gaussian parameters used by the model
 
-    def getDensityPoint(self, x):
-        res = 0
-        for p, g in zip(self.probabilities, self.gaussParams):
-            res += self.estimate_conjunt_density(x, p, g)
-        return res
+        Returns:
+        out:list
 
-    def getPropFromNormal(self, point, gaussiana):
-        mean, std = gaussiana
-        var = std ** 2
-        return 1 / np.sqrt(2* np.pi * var) * np.exp(- (point - mean)**2 / (2*var))
+        """
+        return self._gaussParams
 
-    def generateData(self, n=500):
+    def getProbabilities(self):
+        """
+        Retrieve prior probabilties of gaussians
+
+        Returns:
+        out:list
+
+        """
+        return self._probabilities
+
+    def generateData(self, n=50):
+        """
+        Retrieve generated data with gaussian distribution
+
+        Returns:
+        out:ndarray
+
+        """
+        # Initialize points vector
         points = np.zeros(n)
         for x in range(n):
-            gauss = random.choices(self.gaussParams, weights=self.probabilities)[0]
+            # Choose one gaussian over possibilities with know probabilities like weigths
+            gauss = random.choices(self.getGaussianParameters(), weights=self.getProbabilities())[0]
+            # Generate a point using choosed gaussian
             points[x]  = np.random.normal(gauss[0], gauss[1])
         return points
 
-    def estimate_conjunt_density(self, point, priori, gaussiana):
-        return priori * self.getPropFromNormal(point, gaussiana)
+    def stepExpectation(self, data):
+        """
+        Do expectation step over the instanced EM model
+
+        Parameters:
+        data:ndarray
+
+        """
+        #Prepare Z matrix
+        Z = np.zeros((self.getNumOfGaussians(), len(data)))
+        #Iterate over data
+        for m, x in enumerate(data):
+            sumF = 0
+            for prior, gauss in zip(self.getProbabilities(), self.getGaussianParameters()):
+                sumF += self.getJointProbability(x, prior, gauss)
+            for k, (prior, gaussiana) in enumerate(zip(self.getProbabilities(), self.getGaussianParameters())):
+                    Z[k, m] = self.getJointProbability(x, prior, gaussiana) / sumF
+        return Z
+
+    def stepMaximization(self, Z, data, r_means=False, r_vars=False):
+        """
+        Do maximization step over the instanced EM model
+
+        Parameters:
+        Z:ndarray
+        data:ndarray
+        r_priors:boolean
+        r_means:boolean
+        r_vars:boolean
+
+        """
+        n = np.zeros(self.getNumOfGaussians())
+        for k in range(self.getNumOfGaussians()):
+            n[k] = sum(Z[k, :])
+
+
+        # Reestimate priorities
+        M = len(data)
+        for ind, n_k in enumerate(n):
+            self.getProbabilities()[ind] = n_k / M
+
+        if r_means:
+            # Reestimate means
+            for k in range(self.getNumOfGaussians()):
+                tSum = 0
+                for m, point in enumerate(data):
+                    tSum += Z[k, m] * point
+                self.getGaussianParameters()[k][0] = tSum / n[k]
+        if r_vars:
+            # Reestimate variance
+            for k in range(self.getNumOfGaussians()):
+                tSum = 0
+                for m, point in enumerate(data):
+                    tSum += (Z[k,m] * (point - self.getGaussianParameters()[k][0]) ** 2)
+                self.getGaussianParameters()[k][1] = np.sqrt( tSum / n[k])
+
+    def run(self, data, r_means=False, r_vars=False):
+        """
+        Do algorithm: first execute expectation; then maximization
+
+        Parameters:
+        Z:ndarray
+        data:ndarray
+        r_means:boolean
+        r_vars:boolean
+
+        """
+        Z = self.stepExpectation(data)
+        self.stepMaximization(Z, data, r_means, r_vars)
+
+    def getDensity(self, x):
+        """
+        Retrieve density by a point
+
+        Parameters:
+        x:float
+
+        Returns:
+        out:float
+
+        """
+        out = 0
+        for p, g in zip(self.getProbabilities(), self.getGaussianParameters()):
+            out += self.getJointProbability(x, p, g)
+        return out
+
+    def getJointProbability(self, point, priori, gaussiana):
+        """
+        Retrieve joint density probability
+
+        Parameters:
+        point:float
+        priori:float
+        gaussiana: list
+
+        Returns:
+        out:float
+
+        """
+        mean, std = gaussiana
+        var = std ** 2
+        posteriorProb = np.exp(- (point - mean)**2 / (2*var)) / np.sqrt(2* np.pi * var)
+        return priori * posteriorProb
