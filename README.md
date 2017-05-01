@@ -23,3 +23,8 @@ optional arguments:
     -g1 G1 [G1 ...]     Specify base gaussian 1 and its π. Format: π1 mean1 var1
     -g2 G2 [G2 ...]     Specify base gaussian 2 and its π. Format: π2 mean2 var2
 
+# Common examples
+
+    ./test.py 10 50 base -g1 0.4 -6 4 -g2 0.6 2 4
+    ./test.py 10 150 task1 -g1 0.4 -6 4 -g2 0.6 2 4
+    ./test.py 10 500 task2 -g1 0.4 2 4 -g2 0.6 2 4
