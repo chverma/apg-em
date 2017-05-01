@@ -19,6 +19,9 @@ def main(ndata=50, numIter=10, task='task1'):
     fig, ax1 = plt.subplots()
     # Create initial model in order to generate data
     genModel = ModelEM()
+    #Print generate model parameters
+    print("Generated model")
+    genModel.getStatus()
     # Generate data
     data = genModel.generateData(ndata)
     # Plot histogram
@@ -32,6 +35,9 @@ def main(ndata=50, numIter=10, task='task1'):
     # Create new EM model with random prior probabilities
     p = random.uniform(0.1, 0.9)
     model = ModelEM(probabilities=[p, 1-p])
+    #Print intial model parameters
+    print("Initial model")
+    model.getStatus()
     # Plot initial distribution
     ax2.plot(t1, model.getDensity(t1), color='gray', ls='--', lw=2, label=r'$\theta_{%i}$'%(0))
 
@@ -50,8 +56,7 @@ def main(ndata=50, numIter=10, task='task1'):
         model.run(data, r_means=resMeans, r_vars=resVariance)
         # Print current model parameters
         print("Iteration %i"%(i))
-        for ind, (p, g) in enumerate(zip(model.getProbabilities(), model.getGaussianParameters())):
-            print('g%i: π%i:%.2f mean:%.2f var:%.2f'%(ind, ind+1, p, g[0], g[1]))
+        model.getStatus()
         if i < numIter-1:
             # Plot current distribution
             ax2.plot(t1, model.getDensity(t1), '--', label=r'$\theta_{%i}$'%(i+1))

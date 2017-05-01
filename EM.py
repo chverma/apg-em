@@ -17,6 +17,10 @@ class ModelEM:
         self._gaussParams = gaussParams
         self._nGauss = len(self._probabilities)
 
+    def getStatus(self):
+        for ind, (p, g) in enumerate(zip(self.getProbabilities(), self.getGaussianParameters())):
+            print('g%i: π%i:%.2f mean:%f var:%f'%(ind, ind+1, p, g[0], g[1]))
+
     def getNumOfGaussians(self):
         """
         Retrieve the number of gaussians used by the model
