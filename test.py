@@ -43,7 +43,7 @@ def main(ndata=50, numIter=10, task='task1'):
     if task == 'task1':
         resMeans = True
     else:
-        resVariance  =True
+        resVariance = True
     # Set number of reestimations (iterations)
     for i in range(numIter):
         # Run EM and reestimate parameteres depend on task
@@ -51,7 +51,7 @@ def main(ndata=50, numIter=10, task='task1'):
         # Print current model parameters
         print("Iteration %i"%(i))
         for ind, (p, g) in enumerate(zip(model.getProbabilities(), model.getGaussianParameters())):
-            print('g%i: prob:%.2f mean:%.2f var:%.2f'%(ind, p, g[0], g[1]))
+            print('g%i: π%i:%.2f mean:%.2f var:%.2f'%(ind, ind+1, p, g[0], g[1]))
         if i < numIter-1:
             # Plot current distribution
             ax2.plot(t1, model.getDensity(t1), '--', label=r'$\theta_{%i}$'%(i+1))

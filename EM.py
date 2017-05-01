@@ -58,7 +58,7 @@ class ModelEM:
         # Initialize points vector
         points = np.zeros(n)
         for x in range(n):
-            # Choose one gaussian over possibilities with know probabilities like weigths
+            # Choose one gaussian over possible gaussian with know probabilities like weigths
             gauss = random.choices(self.getGaussianParameters(), weights=self.getProbabilities())[0]
             # Generate a point using choosed gaussian
             points[x]  = np.random.normal(gauss[0], gauss[1])
@@ -112,6 +112,7 @@ class ModelEM:
                 for m, point in enumerate(data):
                     tSum += Z[k, m] * point
                 self.getGaussianParameters()[k][0] = tSum / n[k]
+
         if r_vars:
             # Reestimate variance
             for k in range(self.getNumOfGaussians()):
@@ -132,7 +133,7 @@ class ModelEM:
 
         """
         Z = self.stepExpectation(data)
-        self.stepMaximization(Z, data, r_means, r_vars)
+        self.stepMaximization(Z, data, r_means=r_means, r_vars=r_vars)
 
     def getDensity(self, x):
         """
