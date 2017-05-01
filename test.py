@@ -49,8 +49,8 @@ def main(ndata=50, numIter=10, task='task1', g1=None, g2=None):
     elif task == 'task2':
         resVariance = True
         resMeans = False
-        var1 = random.uniform(0.1, 6)
-        var2 = random.uniform(0.1, 6)
+        var1 = random.uniform(0.1, 10)
+        var2 = random.uniform(0.1, 10)
         model = ModelEM(probabilities=[p, 1-p], gaussParams=[[g1[1], var1], [g2[1], var2]])
     # If base, reestimate only probabilities
     else:
