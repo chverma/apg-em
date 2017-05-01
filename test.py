@@ -72,4 +72,4 @@ if __name__ == '__main__':
                        choices=['task1', 'task2'], help='select task to be reproduced')
 
     args = parser.parse_args()
-    main(ndata=args.ndata[0], numIter=args.iterations[0], task=args.task[0])
+    main(ndata=args.ndata[0], numIter=args.iterations[0], task=args.task)

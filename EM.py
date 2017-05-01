@@ -12,7 +12,7 @@ class ModelEM:
     _gaussParams = None
     _nGauss = None
 
-    def __init__(self, gaussParams=[[-6, 2], [2, 2]], probabilities=[0.4, 0.6]):
+    def __init__(self, gaussParams=[[-6, 4], [2, 4]], probabilities=[0.4, 0.6]):
         self._probabilities = probabilities
         self._gaussParams = gaussParams
         self._nGauss = len(self._probabilities)
