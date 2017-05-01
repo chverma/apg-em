@@ -11,10 +11,13 @@ usage: test.py [-h] I N {task1,task2}
     
 
 positional arguments:
-  I              number of iterations of EM algorithm
-  N              number of data to be generated
-  {task1,task2}  select task to be reproduced
+
+    I              number of iterations of EM algorithm
+    N              number of data to be generated
+    {task1,task2}  select task to be reproduced
+  
 
 optional arguments:
-  -h, --help     show this help message and exit
+
+    -h, --help     show this help message and exit
 
