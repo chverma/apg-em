@@ -61,7 +61,7 @@ class ModelEM:
             # Choose one gaussian over possible gaussian with know probabilities like weigths
             gauss = random.choices(self.getGaussianParameters(), weights=self.getProbabilities())[0]
             # Generate a point using choosed gaussian
-            points[x]  = np.random.normal(gauss[0], gauss[1])
+            points[x]  = np.random.normal(gauss[0], np.sqrt(gauss[1]))
         return points
 
     def stepExpectation(self, data):
@@ -119,7 +119,7 @@ class ModelEM:
                 tSum = 0
                 for m, point in enumerate(data):
                     tSum += (Z[k,m] * (point - self.getGaussianParameters()[k][0]) ** 2)
-                self.getGaussianParameters()[k][1] = np.sqrt( tSum / n[k])
+                self.getGaussianParameters()[k][1] = tSum / n[k]
 
     def run(self, data, r_means=False, r_vars=False):
         """
@@ -164,7 +164,6 @@ class ModelEM:
         out:float
 
         """
-        mean, std = gaussiana
-        var = std ** 2
+        mean, var = gaussiana
         posteriorProb = np.exp(- (point - mean)**2 / (2*var)) / np.sqrt(2* np.pi * var)
         return priori * posteriorProb
